@@ -1,27 +1,210 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reconocedor MNIST</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #101827, #1e293b, #263b5c);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 500px;
+            background: #ffffff;
+            color: #1e293b;
+            padding: 40px 35px;
+            border-radius: 22px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .icono {
+            width: 75px;
+            height: 75px;
+            background: #e0eaff;
+            color: #2563eb;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            margin: 0 auto 20px;
+        }
+
+        h1 {
+            font-size: 27px;
+            margin-bottom: 12px;
+            color: #172554;
+        }
+
+        .descripcion {
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        #formulario {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #inputImagen {
+            width: 100%;
+            padding: 14px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            background: #f8fafc;
+            cursor: pointer;
+            color: #475569;
+        }
+
+        #inputImagen:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .preview-caja {
+            min-height: 210px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        #preview {
+            max-width: 100%;
+            max-height: 220px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        #textoPreview {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        #btnEnviar {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #btnEnviar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        #btnEnviar:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #resultado {
+            margin-top: 25px;
+            padding: 18px;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 19px;
+            font-weight: 600;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        #resultado:empty {
+            display: none;
+        }
+
+        #resultado small {
+            font-size: 13px;
+            font-weight: normal;
+        }
+
+        .pie {
+            margin-top: 25px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .contenedor {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-    <h1>Reconocedor de Números (IA)</h1>
-    <p>Sube una imagen de un número escrito a mano (0-9).</p>
+    <div class="contenedor">
 
-    <form id="formulario">
-        <input type="file" id="inputImagen" accept="image/*" required>
-        
-        <div class="preview-caja">
-            <img id="preview" style="display: none;" alt="Previsualización">
-            <span id="textoPreview">Vista previa de la imagen</span>
+        <div class="icono">🔢</div>
+
+        <h1>Reconocedor de Números</h1>
+
+        <p class="descripcion">
+            Inteligencia artificial para identificar números escritos a mano.
+            Sube una imagen y descubre qué número reconoce el modelo.
+        </p>
+
+        <form id="formulario">
+
+            <input type="file" id="inputImagen" accept="image/*" required>
+
+            <div class="preview-caja">
+                <img id="preview" style="display: none;" alt="Previsualización">
+                <span id="textoPreview">Vista previa de la imagen</span>
+            </div>
+
+            <button type="submit" id="btnEnviar">
+                Analizar Imagen
+            </button>
+
+        </form>
+
+        <div id="resultado"></div>
+
+        <div class="pie">
+            Sistema de reconocimiento basado en IA · MNIST
         </div>
 
-        <button type="submit" id="btnEnviar">Analizar Imagen</button>
-    </form>
-
-    <div id="resultado"></div>
+    </div>
 
     <script>
         const inputImagen = document.getElementById('inputImagen');
@@ -40,7 +223,7 @@
                     preview.src = e.target.result;
                     preview.style.display = 'block';
                     textoPreview.style.display = 'none';
-                    divResultado.innerHTML = ''; // Limpiar resultados anteriores
+                    divResultado.innerHTML = '';
                 }
                 reader.readAsDataURL(file);
             }
@@ -60,14 +243,13 @@
             formData.append('imagen', file);
 
             try {
-                // Al estar en el mismo servidor, usamos ruta relativa
                 const response = await fetch('/predecir', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     divResultado.innerHTML = `¡Es un ${data.numero_predicho}! <br><small style="color: gray">Confianza: ${data.confianza}%</small>`;
                 } else {
@@ -81,5 +263,6 @@
             }
         });
     </script>
+
 </body>
 </html>
